@@ -21,3 +21,4 @@ class EnergyDrink:
         if not self.collected:
             pygame.draw.rect(screen, NEON_PINK, self.get_rect())
             pygame.draw.rect(screen, WHITE, self.get_rect(), 2)
+            
