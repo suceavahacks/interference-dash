@@ -1,4 +1,4 @@
-import pygame
+import pygame # type: ignore
 from utils.constants import *
 
 class Player:
