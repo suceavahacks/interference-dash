@@ -47,7 +47,6 @@ class Level:
         self.load_level_patterns()
 
     def save_progress(self):
-        """Save the highest unlocked level to file"""
         try:
             with open(self.progress_file, 'w') as f:
                 json.dump({
@@ -58,7 +57,6 @@ class Level:
             print(f"Error saving progress: {e}")
     
     def load_progress(self):
-        """Load progress from file"""
         try:
             if os.path.exists(self.progress_file):
                 with open(self.progress_file, 'r') as f:
@@ -126,7 +124,7 @@ class Level:
                 self.max_level_x = plat_data["x"]
         
         for tramp_data in current.get("trampolines", []):
-            trampoline = Trampoline(tramp_data["x"], self.ground_y - tramp_data["y"], tramp_data.get("width", 100), 30)
+            trampoline = Trampoline(tramp_data["x"], self.ground_y - tramp_data["y"], tramp_data.get("width", 250), 70)
             self.trampolines.append(trampoline)
             if tramp_data["x"] > self.max_level_x:
                 self.max_level_x = tramp_data["x"]
@@ -168,7 +166,7 @@ class Level:
             self.platforms.append(platform)
         
         for tramp_data in current.get("trampolines", []):
-            trampoline = Trampoline(tramp_data["x"] + offset, self.ground_y - tramp_data["y"], tramp_data.get("width", 100), 30)
+            trampoline = Trampoline(tramp_data["x"] + offset, self.ground_y - tramp_data["y"], tramp_data.get("width", 250), 70)
             self.trampolines.append(trampoline)
         
         self.last_generated_x = offset + self.max_level_x + 500
@@ -267,9 +265,9 @@ class Level:
         if random.random() > 0.15:
             return
         
-        width = random.randint(90, 120)
+        width = random.randint(220, 280)
         y_pos = self.ground_y - random.randint(50, 120)
-        trampoline = Trampoline(self.procedural_next_trampoline_x, y_pos, width, 30)
+        trampoline = Trampoline(self.procedural_next_trampoline_x, y_pos, width, 70)
         self.trampolines.append(trampoline)
         self.procedural_next_trampoline_x += random.randint(400, 800)
 
