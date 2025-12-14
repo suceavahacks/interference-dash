@@ -39,7 +39,7 @@ while running:
                 running = False
 
     if not game_over:
-        player.update(level.ground_y)
+        player.update(level.ground_y, level.platforms)
         level.update(speed)
         apocalypse.update()
         interference.update()
