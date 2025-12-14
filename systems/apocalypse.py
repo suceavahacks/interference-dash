@@ -3,13 +3,13 @@ from utils.constants import *
 
 class Apocalypse:
     def __init__(self):
-        self.x = -200
+        self.x = -800
         self.width = 200
-        self.speed = APOCALYPSE_SPEED
+        self.base_speed = 0.8
 
     def update(self):
-        self.x += self.speed
-    
+        self.x += self.base_speed
+
     def draw(self, screen):
         pygame.draw.rect(screen, (50, 0, 0), (self.x, 0, self.width, SCREEN_HEIGHT))
         for i in range(5):
