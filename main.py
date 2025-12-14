@@ -41,7 +41,7 @@ while running:
     if not game_over:
         player.update(level.ground_y, level.platforms)
         level.update(speed)
-        apocalypse.update()
+        apocalypse.update(speed)
         interference.update()
 
         for drink in level.collectibles:
@@ -59,8 +59,16 @@ while running:
             game_over = True
 
         score += int(1 * multiplier)
+        
+        level_changed = level.check_level_progression(score)
+        if level_changed:
+            font_big = pygame.font.Font(None, 72)
+            level_up_text = font_big.render(f"LEVEL UP: {level.get_current_level()['name'].upper()}", True, NEON_GREEN)
+            screen.blit(level_up_text, (SCREEN_WIDTH // 2 - 300, SCREEN_HEIGHT // 2))
+            pygame.display.flip()
+            pygame.time.wait(1500)
 
-    screen.fill(DARK_RED)
+    screen.fill(level.bg_color)
 
     shake_offset = interference.get_shake_offset()
     level.draw(screen, shake_offset)
@@ -74,11 +82,15 @@ while running:
     rosen_text = font.render("ROSEN SHINGLE CREEK", True, NEON_GREEN)
     screen.blit(rosen_text, (SCREEN_WIDTH - 350, 20))
 
+    level_name = level.get_current_level()["name"].upper()
+    level_text = font.render(f"level: {level_name}", True, WHITE)
+    screen.blit(level_text, (20, 20))
+
     score_text = font.render(f"score: {score}", True, WHITE)
-    screen.blit(score_text, (20, 20))
+    screen.blit(score_text, (20, 60))
 
     interference_text = font.render(f"interference: {int(interference.level)}", True, NEON_PINK)
-    screen.blit(interference_text, (20, 60))
+    screen.blit(interference_text, (20, 100))
 
     if game_over:
         game_over_text = font.render("GAME OVER - press R to restart", True, RED)

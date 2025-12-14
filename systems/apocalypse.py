@@ -6,9 +6,12 @@ class Apocalypse:
         self.x = -800
         self.width = 200
         self.base_speed = 0.8
+        self.current_speed = 0.8
 
-    def update(self):
-        self.x += self.base_speed
+    def update(self, player_speed):
+        speed_bonus = (player_speed - BASE_SPEED) * 0.15
+        self.current_speed = self.base_speed + speed_bonus
+        self.x += self.current_speed
 
     def draw(self, screen):
         pygame.draw.rect(screen, (50, 0, 0), (self.x, 0, self.width, SCREEN_HEIGHT))
