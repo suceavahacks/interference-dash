@@ -59,7 +59,7 @@ while running:
     else:
         if not game_over and in_game:
             player.update(level.ground_y, level.platforms)
-            level.update(speed, difficulty)
+            level.update(speed, difficulty, player.x)
             interference.update()
 
             for drink in level.collectibles:
@@ -73,6 +73,10 @@ while running:
             for obs in level.obstacles:
                 if player.get_rect().colliderect(obs.get_rect()):
                     game_over = True
+            
+            for animated_obs in level.animated_obstacles:
+                if player.get_rect().colliderect(animated_obs.get_rect()):
+                    game_over = True
 
             score += int(1 * multiplier)
             
@@ -80,7 +84,6 @@ while running:
             if level_changed:
                 menu.unlock_next_level()
                 
-                # Reset everything for the new level
                 speed = BASE_SPEED
                 multiplier = 1.0
                 difficulty = 1.0

@@ -4,6 +4,7 @@ import os
 from entities.obstacle import Obstacle
 from entities.collectible import EnergyDrink
 from entities.platform import Platform
+from entities.animated_obstacle import AnimatedObstacle
 from data.levels import LEVELS
 from utils.constants import *
 
@@ -12,6 +13,7 @@ class Level:
         self.obstacles = []
         self.collectibles = []
         self.platforms = []
+        self.animated_obstacles = []  
         self.ground_y = SCREEN_HEIGHT - 100
         self.current_level_index = 0
         self.score_in_level = 0
@@ -21,6 +23,7 @@ class Level:
         self.procedural_next_obstacle_x = SCREEN_WIDTH
         self.procedural_next_collectible_x = SCREEN_WIDTH + 300
         self.procedural_next_platform_x = SCREEN_WIDTH + 600
+        self.procedural_next_animated_x = SCREEN_WIDTH + 400  
         self.pattern_cycle = 0
         self.last_generated_x = SCREEN_WIDTH
         self.max_level_x = 0
@@ -56,6 +59,7 @@ class Level:
         self.obstacles.clear()
         self.collectibles.clear()
         self.platforms.clear()
+        self.animated_obstacles.clear()
         
         current = self.get_current_level()
         
@@ -63,25 +67,33 @@ class Level:
             self.procedural_next_obstacle_x = SCREEN_WIDTH
             self.procedural_next_collectible_x = SCREEN_WIDTH + 300
             self.procedural_next_platform_x = SCREEN_WIDTH + 600
+            self.procedural_next_animated_x = SCREEN_WIDTH + 400
             return
         
         self.max_level_x = 0
         
         for obs_data in current["obstacles"]:
             if obs_data["type"] == "spike":
-                height = OBSTACLE_HEIGHT
-                width = OBSTACLE_WIDTH
+                size = 80
+                zombie = AnimatedObstacle(obs_data["x"], self.ground_y - size + 20, size)
+                self.animated_obstacles.append(zombie)
+                if obs_data["x"] > self.max_level_x:
+                    self.max_level_x = obs_data["x"]
+            elif obs_data["type"] == "double_spike":
+                size = 80
+                zombie1 = AnimatedObstacle(obs_data["x"], self.ground_y - size + 20, size)
+                zombie2 = AnimatedObstacle(obs_data["x"] + size, self.ground_y - size + 20, size)
+                self.animated_obstacles.append(zombie1)
+                self.animated_obstacles.append(zombie2)
+                if obs_data["x"] > self.max_level_x:
+                    self.max_level_x = obs_data["x"]
             elif obs_data["type"] == "block":
                 height = obs_data.get("height", 60)
                 width = OBSTACLE_WIDTH
-            elif obs_data["type"] == "double_spike":
-                height = OBSTACLE_HEIGHT
-                width = OBSTACLE_WIDTH * 2
-            
-            obs = Obstacle(obs_data["x"], self.ground_y - height, width, height, obs_data["type"])
-            self.obstacles.append(obs)
-            if obs_data["x"] > self.max_level_x:
-                self.max_level_x = obs_data["x"]
+                obs = Obstacle(obs_data["x"], self.ground_y - height, width, height, obs_data["type"])
+                self.obstacles.append(obs)
+                if obs_data["x"] > self.max_level_x:
+                    self.max_level_x = obs_data["x"]
         
         for coll_data in current["collectibles"]:
             drink = EnergyDrink(coll_data["x"], self.ground_y - coll_data["y"])
@@ -108,17 +120,20 @@ class Level:
         
         for obs_data in current["obstacles"]:
             if obs_data["type"] == "spike":
-                height = OBSTACLE_HEIGHT
-                width = OBSTACLE_WIDTH
+                size = 80
+                zombie = AnimatedObstacle(obs_data["x"] + offset, self.ground_y - size + 20, size)
+                self.animated_obstacles.append(zombie)
+            elif obs_data["type"] == "double_spike":
+                size = 80
+                zombie1 = AnimatedObstacle(obs_data["x"] + offset, self.ground_y - size + 20, size)
+                zombie2 = AnimatedObstacle(obs_data["x"] + offset + size, self.ground_y - size + 20, size)
+                self.animated_obstacles.append(zombie1)
+                self.animated_obstacles.append(zombie2)
             elif obs_data["type"] == "block":
                 height = obs_data.get("height", 60)
                 width = OBSTACLE_WIDTH
-            elif obs_data["type"] == "double_spike":
-                height = OBSTACLE_HEIGHT
-                width = OBSTACLE_WIDTH * 2
-            
-            obs = Obstacle(obs_data["x"] + offset, self.ground_y - height, width, height, obs_data["type"])
-            self.obstacles.append(obs)
+                obs = Obstacle(obs_data["x"] + offset, self.ground_y - height, width, height, obs_data["type"])
+                self.obstacles.append(obs)
         
         for coll_data in current["collectibles"]:
             drink = EnergyDrink(coll_data["x"] + offset, self.ground_y - coll_data["y"])
@@ -139,17 +154,16 @@ class Level:
                 self.score_in_level = 0
                 self.bg_color = LEVELS[self.current_level_index]["bg_color"]
                 self.level_completed = False
-                
-                # Save progress
+
                 self.save_progress()
                 
-                # Reset everything for the new level
                 self.pattern_cycle = 0
                 self.last_generated_x = SCREEN_WIDTH
                 self.max_level_x = 0
                 self.procedural_next_obstacle_x = SCREEN_WIDTH
                 self.procedural_next_collectible_x = SCREEN_WIDTH + 300
                 self.procedural_next_platform_x = SCREEN_WIDTH + 600
+                self.procedural_next_animated_x = SCREEN_WIDTH + 400
                 
                 self.load_level_patterns()
                 return True
@@ -167,19 +181,26 @@ class Level:
         obstacle_type = random.choice(current["obstacle_types"])
         
         if obstacle_type == "spike":
-            height = OBSTACLE_HEIGHT
-            width = OBSTACLE_WIDTH
+            size = 80
+            zombie = AnimatedObstacle(self.procedural_next_obstacle_x, self.ground_y - size + 20, size)
+            self.animated_obstacles.append(zombie)
+            spacing = random.randint(200, 400) / difficulty
+            self.procedural_next_obstacle_x += int(spacing)
+        elif obstacle_type == "double_spike":
+            size = 80
+            zombie1 = AnimatedObstacle(self.procedural_next_obstacle_x, self.ground_y - size + 20, size)
+            zombie2 = AnimatedObstacle(self.procedural_next_obstacle_x + size, self.ground_y - size + 20, size)
+            self.animated_obstacles.append(zombie1)
+            self.animated_obstacles.append(zombie2)
+            spacing = random.randint(200, 400) / difficulty
+            self.procedural_next_obstacle_x += int(spacing)
         elif obstacle_type == "block":
             height = random.randint(40, 100)
             width = OBSTACLE_WIDTH
-        elif obstacle_type == "double_spike":
-            height = OBSTACLE_HEIGHT
-            width = OBSTACLE_WIDTH * 2
-        
-        obs = Obstacle(self.procedural_next_obstacle_x, self.ground_y - height, width, height, obstacle_type)
-        self.obstacles.append(obs)
-        spacing = random.randint(200, 400) / difficulty
-        self.procedural_next_obstacle_x += int(spacing)
+            obs = Obstacle(self.procedural_next_obstacle_x, self.ground_y - height, width, height, obstacle_type)
+            self.obstacles.append(obs)
+            spacing = random.randint(200, 400) / difficulty
+            self.procedural_next_obstacle_x += int(spacing)
 
     def generate_procedural_collectible(self):
         current = self.get_current_level()
@@ -209,12 +230,15 @@ class Level:
         self.platforms.append(platform)
         self.procedural_next_platform_x += random.randint(300, 600)
 
-    def update(self, speed, difficulty=1.0):
+    def update(self, speed, difficulty=1.0, player_x=None):
         for obs in self.obstacles:
             obs.update(speed)
         
         for drink in self.collectibles:
             drink.update(speed)
+        
+        for animated_obs in self.animated_obstacles:
+            animated_obs.update(speed, player_x)
 
         for platform in self.platforms:
             platform.update(speed)
@@ -222,6 +246,7 @@ class Level:
         self.obstacles = [obs for obs in self.obstacles if not obs.is_off_screen()]
         self.collectibles = [drink for drink in self.collectibles if not drink.is_off_screen()]
         self.platforms = [p for p in self.platforms if not p.is_off_screen()]
+        self.animated_obstacles = [anim for anim in self.animated_obstacles if not anim.is_off_screen()]
 
         current = self.get_current_level()
         if current.get("procedural", False):
@@ -258,6 +283,14 @@ class Level:
         for obs in self.obstacles:
             screen_obs = Obstacle(obs.x + offset_x, obs.y + offset_y, obs.width, obs.height, obs.type)
             screen_obs.draw(screen)
+        
+        for animated_obs in self.animated_obstacles:
+            temp_x = animated_obs.x
+            animated_obs.x += offset_x
+            animated_obs.y += offset_y
+            animated_obs.draw(screen)
+            animated_obs.x = temp_x
+            animated_obs.y -= offset_y
         
         for drink in self.collectibles:
             if not drink.collected:
