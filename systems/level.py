@@ -1,4 +1,6 @@
 import random
+import json
+import os
 from entities.obstacle import Obstacle
 from entities.collectible import EnergyDrink
 from entities.platform import Platform
@@ -22,7 +24,30 @@ class Level:
         self.pattern_cycle = 0
         self.last_generated_x = SCREEN_WIDTH
         self.max_level_x = 0
+        self.progress_file = "levels_progress.txt"
         self.load_level_patterns()
+
+    def save_progress(self):
+        """Save the highest unlocked level to file"""
+        try:
+            with open(self.progress_file, 'w') as f:
+                json.dump({
+                    'highest_level': self.current_level_index,
+                    'total_levels': len(LEVELS)
+                }, f)
+        except Exception as e:
+            print(f"Error saving progress: {e}")
+    
+    def load_progress(self):
+        """Load progress from file"""
+        try:
+            if os.path.exists(self.progress_file):
+                with open(self.progress_file, 'r') as f:
+                    data = json.load(f)
+                    return data.get('highest_level', 0)
+        except Exception as e:
+            print(f"Error loading progress: {e}")
+        return 0
 
     def get_current_level(self):
         return LEVELS[self.current_level_index]
@@ -114,6 +139,18 @@ class Level:
                 self.score_in_level = 0
                 self.bg_color = LEVELS[self.current_level_index]["bg_color"]
                 self.level_completed = False
+                
+                # Save progress
+                self.save_progress()
+                
+                # Reset everything for the new level
+                self.pattern_cycle = 0
+                self.last_generated_x = SCREEN_WIDTH
+                self.max_level_x = 0
+                self.procedural_next_obstacle_x = SCREEN_WIDTH
+                self.procedural_next_collectible_x = SCREEN_WIDTH + 300
+                self.procedural_next_platform_x = SCREEN_WIDTH + 600
+                
                 self.load_level_patterns()
                 return True
         return False

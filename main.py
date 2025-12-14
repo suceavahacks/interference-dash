@@ -79,6 +79,18 @@ while running:
             level_changed = level.check_level_progression(score)
             if level_changed:
                 menu.unlock_next_level()
+                
+                # Reset everything for the new level
+                speed = BASE_SPEED
+                multiplier = 1.0
+                difficulty = 1.0
+                interference.level = 0
+                player.x = 100
+                player.y = level.ground_y - PLAYER_SIZE
+                player.velocity_y = 0
+                player.on_ground = False
+                score = 0
+                
                 font_big = pygame.font.Font(None, 72)
                 level_up_text = font_big.render(f"LEVEL UP: {level.get_current_level()['name'].upper()}", True, NEON_GREEN)
                 screen.blit(level_up_text, (SCREEN_WIDTH // 2 - 300, SCREEN_HEIGHT // 2))

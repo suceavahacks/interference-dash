@@ -1,4 +1,6 @@
 import pygame
+import json
+import os
 from data.levels import LEVELS
 from utils.constants import *
 
@@ -10,10 +12,35 @@ class Menu:
         self.font_large = pygame.font.Font(None, 72)
         self.font_medium = pygame.font.Font(None, 48)
         self.font_small = pygame.font.Font(None, 36)
+        self.progress_file = "levels_progress.txt"
+        self.load_progress()
+
+    def save_progress(self):
+        """Save unlocked levels to file"""
+        try:
+            with open(self.progress_file, 'w') as f:
+                json.dump({
+                    'unlocked_levels': self.unlocked_levels,
+                    'total_levels': len(LEVELS)
+                }, f)
+        except Exception as e:
+            print(f"Error saving menu progress: {e}")
+    
+    def load_progress(self):
+        """Load progress from file"""
+        try:
+            if os.path.exists(self.progress_file):
+                with open(self.progress_file, 'r') as f:
+                    data = json.load(f)
+                    self.unlocked_levels = data.get('unlocked_levels', 1)
+        except Exception as e:
+            print(f"Error loading menu progress: {e}")
+            self.unlocked_levels = 1
 
     def unlock_next_level(self):
         if self.unlocked_levels < len(LEVELS):
             self.unlocked_levels += 1
+            self.save_progress()
 
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
