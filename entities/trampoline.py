@@ -18,7 +18,8 @@ class Trampoline:
         return self.x + self.width < 0
 
     def get_rect(self):
-        return pygame.Rect(self.x, self.y, self.width, self.height)
+        hitbox_shrink = 10
+        return pygame.Rect(self.x + hitbox_shrink, self.y, self.width - hitbox_shrink * 2, self.height)
     
     def activate_bounce(self):
         self.bounce_animation = 1.0

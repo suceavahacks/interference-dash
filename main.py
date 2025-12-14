@@ -100,18 +100,10 @@ while running:
                 pygame.display.flip()
                 pygame.time.wait(1500)
 
-        screen.fill(level.bg_color)
-
         shake_offset = interference.get_shake_offset()
         level.draw(screen, shake_offset)
-        
-        ground_rect = pygame.Rect(0, level.ground_y, SCREEN_WIDTH, SCREEN_HEIGHT - level.ground_y)
-        pygame.draw.rect(screen, (30, 30, 30), ground_rect)
 
         player.draw(screen)
-
-        rosen_text = font.render("ROSEN SHINGLE CREEK", True, NEON_GREEN)
-        screen.blit(rosen_text, (SCREEN_WIDTH - 350, 20))
 
         level_name = level.get_current_level()["name"].upper()
         level_text = font.render(f"level: {level_name}", True, WHITE)

@@ -1,6 +1,7 @@
 import random
 import json
 import os
+import pygame
 from entities.obstacle import Obstacle
 from entities.collectible import EnergyDrink
 from entities.platform import Platform
@@ -31,6 +32,18 @@ class Level:
         self.last_generated_x = SCREEN_WIDTH
         self.max_level_x = 0
         self.progress_file = "levels_progress.txt"
+        self.bg_scroll_x = 0
+        
+        self.background_images = []
+        for i in range(1, 6):
+            try:
+                bg = pygame.image.load(f"assets/bg_level{i}.jpeg")
+                bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+                self.background_images.append(bg)
+            except Exception as e:
+                print(f"Error loading background {i}: {e}")
+                self.background_images.append(None)
+        
         self.load_level_patterns()
 
     def save_progress(self):
@@ -261,6 +274,10 @@ class Level:
         self.procedural_next_trampoline_x += random.randint(400, 800)
 
     def update(self, speed, difficulty=1.0, player_x=None):
+        self.bg_scroll_x -= speed * 0.3
+        if self.bg_scroll_x <= -SCREEN_WIDTH:
+            self.bg_scroll_x = 0
+        
         for obs in self.obstacles:
             obs.update(speed)
         
@@ -311,6 +328,16 @@ class Level:
                 self.repeat_level_pattern()
 
     def draw(self, screen, shake_offset):
+        if self.current_level_index < len(self.background_images) and self.background_images[self.current_level_index]:
+            bg = self.background_images[self.current_level_index]
+            bg_x1 = self.bg_scroll_x
+            bg_x2 = self.bg_scroll_x + SCREEN_WIDTH
+            
+            screen.blit(bg, (bg_x1, 0))
+            screen.blit(bg, (bg_x2, 0))
+        else:
+            screen.fill(self.bg_color)
+        
         offset_x, offset_y = shake_offset
         
         for platform in self.platforms:
