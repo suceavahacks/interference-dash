@@ -1,6 +1,12 @@
 import pygame
 from utils.constants import *
 
+try:
+    energy_drink_img = pygame.image.load("assets/energy_drink.png")
+    energy_drink_img = pygame.transform.scale(energy_drink_img, (ENERGY_DRINK_SIZE, ENERGY_DRINK_SIZE))
+except:
+    energy_drink_img = None
+
 class EnergyDrink:
     def __init__(self,x,y):
         self.x = x
@@ -19,6 +25,8 @@ class EnergyDrink:
 
     def draw(self, screen):
         if not self.collected:
-            pygame.draw.rect(screen, NEON_PINK, self.get_rect())
-            pygame.draw.rect(screen, WHITE, self.get_rect(), 2)
-            
+            if energy_drink_img:
+                screen.blit(energy_drink_img, (self.x, self.y))
+            else:
+                pygame.draw.rect(screen, NEON_PINK, self.get_rect())
+                pygame.draw.rect(screen, WHITE, self.get_rect(), 2)
