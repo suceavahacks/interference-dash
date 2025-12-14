@@ -10,6 +10,7 @@ class AnimatedObstacle:
         self.animation_frame = 0
         self.animation_speed = 0.08
         self.passed_by_player = False
+        self.walk_speed = 2.0
         
         try:
             self.going_left_normal = pygame.image.load("assets/going_left_normal.png")
@@ -41,7 +42,11 @@ class AnimatedObstacle:
                 self.passed_by_player = True
                 self.facing_left = False
         
-        self.animation_frame += self.animation_speed
+        if self.passed_by_player and not self.facing_left:
+            self.x += self.walk_speed
+        
+        speed_multiplier = min(speed / 5.0, 3.0)
+        self.animation_frame += self.animation_speed * speed_multiplier
         
     def draw(self, screen):
         if not self.images_loaded:

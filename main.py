@@ -58,7 +58,7 @@ while running:
         menu.draw(screen)
     else:
         if not game_over and in_game:
-            player.update(level.ground_y, level.platforms)
+            player.update(level.ground_y, level.platforms, level.trampolines)
             level.update(speed, difficulty, player.x)
             interference.update()
 

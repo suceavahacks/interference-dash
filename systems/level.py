@@ -4,6 +4,7 @@ import os
 from entities.obstacle import Obstacle
 from entities.collectible import EnergyDrink
 from entities.platform import Platform
+from entities.trampoline import Trampoline
 from entities.animated_obstacle import AnimatedObstacle
 from data.levels import LEVELS
 from utils.constants import *
@@ -13,6 +14,7 @@ class Level:
         self.obstacles = []
         self.collectibles = []
         self.platforms = []
+        self.trampolines = []
         self.animated_obstacles = []  
         self.ground_y = SCREEN_HEIGHT - 100
         self.current_level_index = 0
@@ -23,6 +25,7 @@ class Level:
         self.procedural_next_obstacle_x = SCREEN_WIDTH
         self.procedural_next_collectible_x = SCREEN_WIDTH + 300
         self.procedural_next_platform_x = SCREEN_WIDTH + 600
+        self.procedural_next_trampoline_x = SCREEN_WIDTH + 500
         self.procedural_next_animated_x = SCREEN_WIDTH + 400  
         self.pattern_cycle = 0
         self.last_generated_x = SCREEN_WIDTH
@@ -59,6 +62,7 @@ class Level:
         self.obstacles.clear()
         self.collectibles.clear()
         self.platforms.clear()
+        self.trampolines.clear()
         self.animated_obstacles.clear()
         
         current = self.get_current_level()
@@ -67,6 +71,7 @@ class Level:
             self.procedural_next_obstacle_x = SCREEN_WIDTH
             self.procedural_next_collectible_x = SCREEN_WIDTH + 300
             self.procedural_next_platform_x = SCREEN_WIDTH + 600
+            self.procedural_next_trampoline_x = SCREEN_WIDTH + 500
             self.procedural_next_animated_x = SCREEN_WIDTH + 400
             return
         
@@ -107,6 +112,12 @@ class Level:
             if plat_data["x"] > self.max_level_x:
                 self.max_level_x = plat_data["x"]
         
+        for tramp_data in current.get("trampolines", []):
+            trampoline = Trampoline(tramp_data["x"], self.ground_y - tramp_data["y"], tramp_data.get("width", 100), 30)
+            self.trampolines.append(trampoline)
+            if tramp_data["x"] > self.max_level_x:
+                self.max_level_x = tramp_data["x"]
+        
         self.last_generated_x = self.max_level_x + 500
         self.pattern_cycle = 0
 
@@ -143,6 +154,10 @@ class Level:
             platform = Platform(plat_data["x"] + offset, self.ground_y - plat_data["y"], plat_data["width"], 20)
             self.platforms.append(platform)
         
+        for tramp_data in current.get("trampolines", []):
+            trampoline = Trampoline(tramp_data["x"] + offset, self.ground_y - tramp_data["y"], tramp_data.get("width", 100), 30)
+            self.trampolines.append(trampoline)
+        
         self.last_generated_x = offset + self.max_level_x + 500
         self.pattern_cycle += 1
 
@@ -163,6 +178,7 @@ class Level:
                 self.procedural_next_obstacle_x = SCREEN_WIDTH
                 self.procedural_next_collectible_x = SCREEN_WIDTH + 300
                 self.procedural_next_platform_x = SCREEN_WIDTH + 600
+                self.procedural_next_trampoline_x = SCREEN_WIDTH + 500
                 self.procedural_next_animated_x = SCREEN_WIDTH + 400
                 
                 self.load_level_patterns()
@@ -229,6 +245,20 @@ class Level:
         platform = Platform(self.procedural_next_platform_x, y_pos, width, height)
         self.platforms.append(platform)
         self.procedural_next_platform_x += random.randint(300, 600)
+    
+    def generate_procedural_trampoline(self):
+        current = self.get_current_level()
+        if not current.get("procedural", False):
+            return
+        
+        if random.random() > 0.15:
+            return
+        
+        width = random.randint(90, 120)
+        y_pos = self.ground_y - random.randint(50, 120)
+        trampoline = Trampoline(self.procedural_next_trampoline_x, y_pos, width, 30)
+        self.trampolines.append(trampoline)
+        self.procedural_next_trampoline_x += random.randint(400, 800)
 
     def update(self, speed, difficulty=1.0, player_x=None):
         for obs in self.obstacles:
@@ -242,10 +272,14 @@ class Level:
 
         for platform in self.platforms:
             platform.update(speed)
+        
+        for trampoline in self.trampolines:
+            trampoline.update(speed)
 
         self.obstacles = [obs for obs in self.obstacles if not obs.is_off_screen()]
         self.collectibles = [drink for drink in self.collectibles if not drink.is_off_screen()]
         self.platforms = [p for p in self.platforms if not p.is_off_screen()]
+        self.trampolines = [t for t in self.trampolines if not t.is_off_screen()]
         self.animated_obstacles = [anim for anim in self.animated_obstacles if not anim.is_off_screen()]
 
         current = self.get_current_level()
@@ -258,6 +292,9 @@ class Level:
 
             if self.procedural_next_platform_x < SCREEN_WIDTH + 700:
                 self.generate_procedural_platform()
+            
+            if self.procedural_next_trampoline_x < SCREEN_WIDTH + 750:
+                self.generate_procedural_trampoline()
         else:
             rightmost_x = 0
             for obs in self.obstacles:
@@ -279,6 +316,11 @@ class Level:
         for platform in self.platforms:
             shifted_platform = Platform(platform.x + offset_x, platform.y + offset_y, platform.width, platform.height)
             shifted_platform.draw(screen)
+        
+        for trampoline in self.trampolines:
+            shifted_trampoline = Trampoline(trampoline.x + offset_x, trampoline.y + offset_y, trampoline.width, trampoline.height)
+            shifted_trampoline.bounce_animation = trampoline.bounce_animation
+            shifted_trampoline.draw(screen)
         
         for obs in self.obstacles:
             screen_obs = Obstacle(obs.x + offset_x, obs.y + offset_y, obs.width, obs.height, obs.type)
