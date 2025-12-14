@@ -19,6 +19,9 @@ class Level:
         self.procedural_next_obstacle_x = SCREEN_WIDTH
         self.procedural_next_collectible_x = SCREEN_WIDTH + 300
         self.procedural_next_platform_x = SCREEN_WIDTH + 600
+        self.pattern_cycle = 0
+        self.last_generated_x = SCREEN_WIDTH
+        self.max_level_x = 0
         self.load_level_patterns()
 
     def get_current_level(self):
@@ -32,37 +35,76 @@ class Level:
         current = self.get_current_level()
         
         if current.get("procedural", False):
+            self.procedural_next_obstacle_x = SCREEN_WIDTH
+            self.procedural_next_collectible_x = SCREEN_WIDTH + 300
+            self.procedural_next_platform_x = SCREEN_WIDTH + 600
             return
         
-        for pattern in current["obstacle_patterns"]:
-            base_x = pattern["x"]
-            for i in range(6):
-                x_pos = base_x + (i * pattern["spacing"])
-                
-                if pattern["type"] == "spike":
-                    height = OBSTACLE_HEIGHT
-                    width = OBSTACLE_WIDTH
-                elif pattern["type"] == "block":
-                    height = random.randint(40, 100)
-                    width = OBSTACLE_WIDTH
-                elif pattern["type"] == "double_spike":
-                    height = OBSTACLE_HEIGHT
-                    width = OBSTACLE_WIDTH * 2
-                
-                obs = Obstacle(x_pos, self.ground_y - height, width, height, pattern["type"])
-                self.obstacles.append(obs)
+        self.max_level_x = 0
         
-        for pos in current["collectible_positions"]:
-            for i in range(5):
-                x_pos = pos["x"] + (i * 700)
-                drink = EnergyDrink(x_pos, self.ground_y - pos["y"])
-                self.collectibles.append(drink)
+        for obs_data in current["obstacles"]:
+            if obs_data["type"] == "spike":
+                height = OBSTACLE_HEIGHT
+                width = OBSTACLE_WIDTH
+            elif obs_data["type"] == "block":
+                height = obs_data.get("height", 60)
+                width = OBSTACLE_WIDTH
+            elif obs_data["type"] == "double_spike":
+                height = OBSTACLE_HEIGHT
+                width = OBSTACLE_WIDTH * 2
+            
+            obs = Obstacle(obs_data["x"], self.ground_y - height, width, height, obs_data["type"])
+            self.obstacles.append(obs)
+            if obs_data["x"] > self.max_level_x:
+                self.max_level_x = obs_data["x"]
         
-        for pos in current["platform_positions"]:
-            for i in range(4):
-                x_pos = pos["x"] + (i * 800)
-                platform = Platform(x_pos, self.ground_y - pos["y"], pos["width"], 20)
-                self.platforms.append(platform)
+        for coll_data in current["collectibles"]:
+            drink = EnergyDrink(coll_data["x"], self.ground_y - coll_data["y"])
+            self.collectibles.append(drink)
+            if coll_data["x"] > self.max_level_x:
+                self.max_level_x = coll_data["x"]
+        
+        for plat_data in current["platforms"]:
+            platform = Platform(plat_data["x"], self.ground_y - plat_data["y"], plat_data["width"], 20)
+            self.platforms.append(platform)
+            if plat_data["x"] > self.max_level_x:
+                self.max_level_x = plat_data["x"]
+        
+        self.last_generated_x = self.max_level_x + 500
+        self.pattern_cycle = 0
+
+    def repeat_level_pattern(self):
+        current = self.get_current_level()
+        
+        if current.get("procedural", False):
+            return
+        
+        offset = self.last_generated_x
+        
+        for obs_data in current["obstacles"]:
+            if obs_data["type"] == "spike":
+                height = OBSTACLE_HEIGHT
+                width = OBSTACLE_WIDTH
+            elif obs_data["type"] == "block":
+                height = obs_data.get("height", 60)
+                width = OBSTACLE_WIDTH
+            elif obs_data["type"] == "double_spike":
+                height = OBSTACLE_HEIGHT
+                width = OBSTACLE_WIDTH * 2
+            
+            obs = Obstacle(obs_data["x"] + offset, self.ground_y - height, width, height, obs_data["type"])
+            self.obstacles.append(obs)
+        
+        for coll_data in current["collectibles"]:
+            drink = EnergyDrink(coll_data["x"] + offset, self.ground_y - coll_data["y"])
+            self.collectibles.append(drink)
+        
+        for plat_data in current["platforms"]:
+            platform = Platform(plat_data["x"] + offset, self.ground_y - plat_data["y"], plat_data["width"], 20)
+            self.platforms.append(platform)
+        
+        self.last_generated_x = offset + self.max_level_x + 500
+        self.pattern_cycle += 1
 
     def check_level_progression(self, score):
         current = self.get_current_level()
@@ -76,12 +118,13 @@ class Level:
                 return True
         return False
 
-    def generate_procedural_obstacle(self):
+    def generate_procedural_obstacle(self, difficulty=1.0):
         current = self.get_current_level()
         if not current.get("procedural", False):
             return
         
-        if random.random() > current["obstacle_frequency"]:
+        frequency = current["obstacle_frequency"] * difficulty
+        if random.random() > min(frequency, 0.95):
             return
         
         obstacle_type = random.choice(current["obstacle_types"])
@@ -98,7 +141,8 @@ class Level:
         
         obs = Obstacle(self.procedural_next_obstacle_x, self.ground_y - height, width, height, obstacle_type)
         self.obstacles.append(obs)
-        self.procedural_next_obstacle_x += random.randint(200, 400)
+        spacing = random.randint(200, 400) / difficulty
+        self.procedural_next_obstacle_x += int(spacing)
 
     def generate_procedural_collectible(self):
         current = self.get_current_level()
@@ -128,7 +172,7 @@ class Level:
         self.platforms.append(platform)
         self.procedural_next_platform_x += random.randint(300, 600)
 
-    def update(self, speed):
+    def update(self, speed, difficulty=1.0):
         for obs in self.obstacles:
             obs.update(speed)
         
@@ -145,13 +189,27 @@ class Level:
         current = self.get_current_level()
         if current.get("procedural", False):
             if self.procedural_next_obstacle_x < SCREEN_WIDTH + 500:
-                self.generate_procedural_obstacle()
+                self.generate_procedural_obstacle(difficulty)
             
             if self.procedural_next_collectible_x < SCREEN_WIDTH + 600:
                 self.generate_procedural_collectible()
 
             if self.procedural_next_platform_x < SCREEN_WIDTH + 700:
                 self.generate_procedural_platform()
+        else:
+            rightmost_x = 0
+            for obs in self.obstacles:
+                if obs.x > rightmost_x:
+                    rightmost_x = obs.x
+            for drink in self.collectibles:
+                if drink.x > rightmost_x:
+                    rightmost_x = drink.x
+            for plat in self.platforms:
+                if plat.x > rightmost_x:
+                    rightmost_x = plat.x
+            
+            if rightmost_x < SCREEN_WIDTH + 1000:
+                self.repeat_level_pattern()
 
     def draw(self, screen, shake_offset):
         offset_x, offset_y = shake_offset
