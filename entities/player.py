@@ -1,5 +1,6 @@
 import pygame
 from utils.constants import *
+import os
 
 class Player:
     def __init__(self, x, y):
@@ -10,6 +11,24 @@ class Player:
         self.velocity_y = 0
         self.on_ground = False
         self.alive = True
+        
+        assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets')
+        
+        self.walking_frames = []
+        for i in range(1, 5):
+            img = pygame.image.load(os.path.join(assets_dir, f'walking{i}.png'))
+            img = pygame.transform.scale(img, (PLAYER_SIZE, PLAYER_SIZE))
+            self.walking_frames.append(img)
+        
+        self.jumping_frames = []
+        for i in range(1, 4):
+            img = pygame.image.load(os.path.join(assets_dir, f'jumping{i}.png'))
+            img = pygame.transform.scale(img, (PLAYER_SIZE, PLAYER_SIZE))
+            self.jumping_frames.append(img)
+        
+        self.current_frame = 0
+        self.animation_speed = 0.15
+        self.animation_counter = 0
 
     def jump(self):
         if self.on_ground:
@@ -21,23 +40,13 @@ class Player:
         self.y += self.velocity_y
 
         self.on_ground = False
+        
+        on_trampoline = False
 
         if self.y >= ground_y - self.height:
             self.y = ground_y - self.height
             self.velocity_y = 0
             self.on_ground = True
-
-        for platform in platforms:
-            player_rect = self.get_rect()
-            platform_rect = platform.get_rect()
-            
-            if (player_rect.colliderect(platform_rect) and 
-                self.velocity_y >= 0 and
-                player_rect.bottom - self.velocity_y <= platform_rect.top + 5):
-                self.y = platform_rect.top - self.height
-                self.velocity_y = 0
-                self.on_ground = True
-                break
         
         for trampoline in trampolines:
             player_rect = self.get_rect()
@@ -45,15 +54,47 @@ class Player:
             
             if (player_rect.colliderect(trampoline_rect) and 
                 self.velocity_y >= 0 and
-                player_rect.bottom - self.velocity_y <= trampoline_rect.top + 5):
+                player_rect.bottom - self.velocity_y <= trampoline_rect.top + 10):
                 self.y = trampoline_rect.top - self.height
-                self.velocity_y = JUMP_STRENGTH * 1.8
+                self.velocity_y = JUMP_STRENGTH * 1.5
                 self.on_ground = False
+                on_trampoline = True
                 trampoline.activate_bounce()
                 break
+
+        if not on_trampoline:
+            for platform in platforms:
+                player_rect = self.get_rect()
+                platform_rect = platform.get_rect()
+                
+                if (player_rect.colliderect(platform_rect) and 
+                    self.velocity_y >= 0 and
+                    player_rect.bottom - self.velocity_y <= platform_rect.top + 10):
+                    self.y = platform_rect.top - self.height
+                    self.velocity_y = 0
+                    self.on_ground = True
+                    break
+        
+        self.animation_counter += self.animation_speed
+        if self.on_ground:
+            if self.animation_counter >= 1:
+                self.animation_counter = 0
+                self.current_frame = (self.current_frame + 1) % len(self.walking_frames)
+        else:
+            if self.velocity_y < -5: 
+                self.current_frame = 0
+            elif self.velocity_y < 0: 
+                self.current_frame = 1
+            else:  
+                self.current_frame = 2
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, screen):
-        pygame.draw.rect(screen, NEON_GREEN, self.get_rect())
+        if self.on_ground:
+            frame = self.walking_frames[self.current_frame % len(self.walking_frames)]
+        else:
+            frame = self.jumping_frames[min(self.current_frame, len(self.jumping_frames) - 1)]
+        
+        screen.blit(frame, (self.x, self.y))
