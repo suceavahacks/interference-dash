@@ -105,34 +105,104 @@ while running:
 
         player.draw(screen)
 
-        level_name = level.get_current_level()["name"].upper()
-        level_text = font.render(f"level: {level_name}", True, WHITE)
-        screen.blit(level_text, (20, 20))
-
-        score_text = font.render(f"score: {score}", True, WHITE)
-        screen.blit(score_text, (20, 60))
-
-        speed_display = speed / BASE_SPEED
-        speed_text = font.render(f"speed: {speed_display:.1f}x", True, (0, 255, 200))
-        screen.blit(speed_text, (20, 100))
-
-        interference_text = font.render(f"interference: {int(interference.level)}", True, NEON_PINK)
-        screen.blit(interference_text, (20, 140))
+        panel_x = 20
+        panel_y = 20
+        panel_width = 280
+        panel_height = 210
+        panel_padding = 15
         
-        difficulty_text = font.render(f"difficulty: {difficulty:.1f}x", True, (255, 200, 0))
-        screen.blit(difficulty_text, (20, 180))
+        panel_bg = pygame.Surface((panel_width, panel_height))
+        panel_bg.set_alpha(180)
+        panel_bg.fill((20, 10, 30))
+        screen.blit(panel_bg, (panel_x, panel_y))
+        
+        pygame.draw.rect(screen, (100, 255, 200), (panel_x, panel_y, panel_width, panel_height), 3, 8)
+        
+        corner_size = 10
+        corner_color = (100, 255, 200)
+        corners = [
+            (panel_x, panel_y),
+            (panel_x + panel_width - corner_size, panel_y),
+            (panel_x, panel_y + panel_height - corner_size),
+            (panel_x + panel_width - corner_size, panel_y + panel_height - corner_size)
+        ]
+        for cx, cy in corners:
+            pygame.draw.rect(screen, corner_color, (cx, cy, corner_size, corner_size))
+        
+        text_x = panel_x + panel_padding
+        text_y = panel_y + panel_padding
+        line_height = 38
+        
+        font_label = pygame.font.Font(None, 28)
+        font_value = pygame.font.Font(None, 42)
+        
+        level_name = level.get_current_level()["name"].upper()
+        level_label = font_label.render("LEVEL", True, (150, 150, 150))
+        level_value = font_value.render(level_name, True, (100, 255, 200))
+        screen.blit(level_label, (text_x, text_y))
+        screen.blit(level_value, (text_x, text_y + 18))
+        
+        score_label = font_label.render("SCORE", True, (150, 150, 150))
+        score_value = font_value.render(str(score), True, (255, 200, 120))
+        screen.blit(score_label, (text_x, text_y + line_height * 1 + 10))
+        screen.blit(score_value, (text_x, text_y + line_height * 1 + 28))
+        
+        interference_label = font_label.render("INTERFERENCE", True, (150, 150, 150))
+        interference_value = font_value.render(str(int(interference.level)), True, (255, 100, 150))
+        screen.blit(interference_label, (text_x, text_y + line_height * 2 + 20))
+        screen.blit(interference_value, (text_x, text_y + line_height * 2 + 38))
+        
+        diff_label = font_label.render("DIFFICULTY", True, (150, 150, 150))
+        diff_value = font_value.render(f"{difficulty:.1f}x", True, (255, 150, 50))
+        screen.blit(diff_label, (text_x, text_y + line_height * 3 + 30))
+        screen.blit(diff_value, (text_x, text_y + line_height * 3 + 48))
+        
+        bar_panel_x = SCREEN_WIDTH - 260
+        bar_panel_y = SCREEN_HEIGHT - 80
+        bar_panel_width = 240
+        bar_panel_height = 60
+        
+        bar_bg = pygame.Surface((bar_panel_width, bar_panel_height))
+        bar_bg.set_alpha(180)
+        bar_bg.fill((20, 10, 30))
+        screen.blit(bar_bg, (bar_panel_x, bar_panel_y))
+        
+        pygame.draw.rect(screen, (100, 255, 200), (bar_panel_x, bar_panel_y, bar_panel_width, bar_panel_height), 3, 8)
+        
+        corners_bar = [
+            (bar_panel_x, bar_panel_y),
+            (bar_panel_x + bar_panel_width - corner_size, bar_panel_y),
+            (bar_panel_x, bar_panel_y + bar_panel_height - corner_size),
+            (bar_panel_x + bar_panel_width - corner_size, bar_panel_y + bar_panel_height - corner_size)
+        ]
+        for cx, cy in corners_bar:
+            pygame.draw.rect(screen, corner_color, (cx, cy, corner_size, corner_size))
         
         speed_bar_width = 200
-        speed_bar_height = 15
-        speed_bar_x = SCREEN_WIDTH - speed_bar_width - 20
-        speed_bar_y = SCREEN_HEIGHT - 40
-        pygame.draw.rect(screen, (50, 50, 50), (speed_bar_x, speed_bar_y, speed_bar_width, speed_bar_height))
+        speed_bar_height = 20
+        speed_bar_x = bar_panel_x + 20
+        speed_bar_y = bar_panel_y + 30
+        
+        pygame.draw.rect(screen, (40, 30, 50), (speed_bar_x, speed_bar_y, speed_bar_width, speed_bar_height), 0, 5)
+        
+        speed_display = speed / BASE_SPEED
         speed_fill = min((speed / (BASE_SPEED * 3)) * speed_bar_width, speed_bar_width)
-        color_intensity = min(255, int(speed_fill / speed_bar_width * 255))
-        pygame.draw.rect(screen, (0, 255 - color_intensity, color_intensity), (speed_bar_x, speed_bar_y, int(speed_fill), speed_bar_height))
-        pygame.draw.rect(screen, WHITE, (speed_bar_x, speed_bar_y, speed_bar_width, speed_bar_height), 2)
-        speed_label = pygame.font.Font(None, 24).render("SPEED", True, WHITE)
-        screen.blit(speed_label, (speed_bar_x - 60, speed_bar_y - 2))
+        fill_width = int(speed_fill)
+        
+        if fill_width > 0:
+            fill_rect = pygame.Rect(speed_bar_x, speed_bar_y, fill_width, speed_bar_height)
+            if speed_display < 1.5:
+                bar_color = (100, 255, 200)
+            elif speed_display < 2.5:
+                bar_color = (255, 200, 100)
+            else:
+                bar_color = (255, 100, 150)
+            pygame.draw.rect(screen, bar_color, fill_rect, 0, 5)
+        
+        pygame.draw.rect(screen, (100, 255, 200), (speed_bar_x, speed_bar_y, speed_bar_width, speed_bar_height), 2, 5)
+        
+        speed_label = font_label.render(f"SPEED: {speed_display:.1f}x", True, WHITE)
+        screen.blit(speed_label, (speed_bar_x + 5, bar_panel_y + 8))
 
         if game_over:
             game_over_text = font.render("GAME OVER - R: restart | ESC: menu", True, RED)
