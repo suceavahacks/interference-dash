@@ -78,7 +78,7 @@ while running:
                 if player.get_rect().colliderect(animated_obs.get_rect()):
                     game_over = True
 
-            score += int(1 * multiplier)
+            score += int(1 * multiplier * difficulty)
             
             level_changed = level.check_level_progression(score)
             if level_changed:
@@ -147,7 +147,7 @@ while running:
         screen.blit(score_label, (text_x, text_y + line_height * 1 + 10))
         screen.blit(score_value, (text_x, text_y + line_height * 1 + 28))
         
-        interference_label = font_label.render("INTERFERENCE", True, (150, 150, 150))
+        interference_label = font_label.render("ENERGY DRINKS", True, (150, 150, 150))
         interference_value = font_value.render(str(int(interference.level)), True, (255, 100, 150))
         screen.blit(interference_label, (text_x, text_y + line_height * 2 + 20))
         screen.blit(interference_value, (text_x, text_y + line_height * 2 + 38))
