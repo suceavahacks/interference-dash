@@ -61,9 +61,9 @@ class Menu:
 
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
                 self.selected_level = max(0, self.selected_level - 1)
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 self.selected_level = min(self.unlocked_levels - 1, self.selected_level + 1)
             elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                 self.in_menu = False
