@@ -9,7 +9,7 @@ from systems.menu import Menu
 pygame.init()
 pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("interference-dash")
+pygame.display.set_caption("Orlando Apocalypse")
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, 36)
 

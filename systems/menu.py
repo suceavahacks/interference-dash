@@ -85,8 +85,8 @@ class Menu:
         self.button_hover_offset = int(math.sin(self.animation_counter) * 5)
         
         title_color = (255, 100, 150)
-        title = self.font_large.render("INTERFERENCE DASH", True, title_color)
-        title_shadow = self.font_large.render("INTERFERENCE DASH", True, (100, 20, 50))
+        title = self.font_large.render("ORLANDO APOCALYPSE", True, title_color)
+        title_shadow = self.font_large.render("ORLANDO APOCALYPSE", True, (100, 20, 50))
         title_x = SCREEN_WIDTH // 2 - title.get_width() // 2
         screen.blit(title_shadow, (title_x + 3, 33))
         screen.blit(title, (title_x, 30))
