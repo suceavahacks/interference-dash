@@ -61,9 +61,9 @@ class Menu:
 
     def handle_input(self, event):
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP or event.key == pygame.K_w:
                 self.selected_level = max(0, self.selected_level - 1)
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN or event.key == pygame.K_s:
                 self.selected_level = min(self.unlocked_levels - 1, self.selected_level + 1)
             elif event.key == pygame.K_RETURN or event.key == pygame.K_SPACE:
                 self.in_menu = False
@@ -85,8 +85,8 @@ class Menu:
         self.button_hover_offset = int(math.sin(self.animation_counter) * 5)
         
         title_color = (255, 100, 150)
-        title = self.font_large.render("INTERFERENCE DASH", True, title_color)
-        title_shadow = self.font_large.render("INTERFERENCE DASH", True, (100, 20, 50))
+        title = self.font_large.render("ORLANDO APOCALYPSE", True, title_color)
+        title_shadow = self.font_large.render("ORLANDO APOCALYPSE", True, (100, 20, 50))
         title_x = SCREEN_WIDTH // 2 - title.get_width() // 2
         screen.blit(title_shadow, (title_x + 3, 33))
         screen.blit(title, (title_x, 30))
