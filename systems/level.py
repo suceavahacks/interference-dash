@@ -139,37 +139,50 @@ class Level:
             return
         
         offset = self.last_generated_x
+        new_max_x = 0
         
         for obs_data in current["obstacles"]:
             if obs_data["type"] == "spike":
                 size = 80
                 zombie = AnimatedObstacle(obs_data["x"] + offset, self.ground_y - size + 20, size)
                 self.animated_obstacles.append(zombie)
+                if obs_data["x"] > new_max_x:
+                    new_max_x = obs_data["x"]
             elif obs_data["type"] == "double_spike":
                 size = 80
                 zombie1 = AnimatedObstacle(obs_data["x"] + offset, self.ground_y - size + 20, size)
                 zombie2 = AnimatedObstacle(obs_data["x"] + offset + size, self.ground_y - size + 20, size)
                 self.animated_obstacles.append(zombie1)
                 self.animated_obstacles.append(zombie2)
+                if obs_data["x"] > new_max_x:
+                    new_max_x = obs_data["x"]
             elif obs_data["type"] == "block":
                 height = obs_data.get("height", 60)
                 width = OBSTACLE_WIDTH
                 obs = Obstacle(obs_data["x"] + offset, self.ground_y - height, width, height, obs_data["type"])
                 self.obstacles.append(obs)
+                if obs_data["x"] > new_max_x:
+                    new_max_x = obs_data["x"]
         
         for coll_data in current["collectibles"]:
             drink = EnergyDrink(coll_data["x"] + offset, self.ground_y - coll_data["y"])
             self.collectibles.append(drink)
+            if coll_data["x"] > new_max_x:
+                new_max_x = coll_data["x"]
         
         for plat_data in current["platforms"]:
             platform = Platform(plat_data["x"] + offset, self.ground_y - plat_data["y"], plat_data["width"], 20)
             self.platforms.append(platform)
+            if plat_data["x"] > new_max_x:
+                new_max_x = plat_data["x"]
         
         for tramp_data in current.get("trampolines", []):
             trampoline = Trampoline(tramp_data["x"] + offset, self.ground_y - 70, tramp_data.get("width", 250), 70)
             self.trampolines.append(trampoline)
+            if tramp_data["x"] > new_max_x:
+                new_max_x = tramp_data["x"]
         
-        self.last_generated_x = offset + self.max_level_x + 500
+        self.last_generated_x = offset + new_max_x + 500
         self.pattern_cycle += 1
 
     def check_level_progression(self, score):
