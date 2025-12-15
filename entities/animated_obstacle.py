@@ -64,7 +64,7 @@ class AnimatedObstacle:
         screen.blit(current_image, (self.x, self.y))
     
     def get_rect(self):
-        hitbox_shrink = 15
+        hitbox_shrink = 25
         return pygame.Rect(self.x + hitbox_shrink, self.y + hitbox_shrink, 
                           self.size - hitbox_shrink * 2, self.size - hitbox_shrink * 2)
     
