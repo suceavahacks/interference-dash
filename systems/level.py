@@ -124,7 +124,7 @@ class Level:
                 self.max_level_x = plat_data["x"]
         
         for tramp_data in current.get("trampolines", []):
-            trampoline = Trampoline(tramp_data["x"], self.ground_y - tramp_data["y"], tramp_data.get("width", 250), 70)
+            trampoline = Trampoline(tramp_data["x"], self.ground_y - 70, tramp_data.get("width", 250), 70)
             self.trampolines.append(trampoline)
             if tramp_data["x"] > self.max_level_x:
                 self.max_level_x = tramp_data["x"]
@@ -166,7 +166,7 @@ class Level:
             self.platforms.append(platform)
         
         for tramp_data in current.get("trampolines", []):
-            trampoline = Trampoline(tramp_data["x"] + offset, self.ground_y - tramp_data["y"], tramp_data.get("width", 250), 70)
+            trampoline = Trampoline(tramp_data["x"] + offset, self.ground_y - 70, tramp_data.get("width", 250), 70)
             self.trampolines.append(trampoline)
         
         self.last_generated_x = offset + self.max_level_x + 500
@@ -266,7 +266,7 @@ class Level:
             return
         
         width = random.randint(220, 280)
-        y_pos = self.ground_y - random.randint(50, 120)
+        y_pos = self.ground_y - 70  
         trampoline = Trampoline(self.procedural_next_trampoline_x, y_pos, width, 70)
         self.trampolines.append(trampoline)
         self.procedural_next_trampoline_x += random.randint(400, 800)

@@ -1,5 +1,6 @@
 import pygame
 from utils.constants import *
+import os
 
 class Player:
     def __init__(self, x, y):
@@ -10,6 +11,24 @@ class Player:
         self.velocity_y = 0
         self.on_ground = False
         self.alive = True
+        
+        assets_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets')
+        
+        self.walking_frames = []
+        for i in range(1, 5):
+            img = pygame.image.load(os.path.join(assets_dir, f'walking{i}.png'))
+            img = pygame.transform.scale(img, (PLAYER_SIZE, PLAYER_SIZE))
+            self.walking_frames.append(img)
+        
+        self.jumping_frames = []
+        for i in range(1, 4):
+            img = pygame.image.load(os.path.join(assets_dir, f'jumping{i}.png'))
+            img = pygame.transform.scale(img, (PLAYER_SIZE, PLAYER_SIZE))
+            self.jumping_frames.append(img)
+        
+        self.current_frame = 0
+        self.animation_speed = 0.15
+        self.animation_counter = 0
 
     def jump(self):
         if self.on_ground:
@@ -51,9 +70,27 @@ class Player:
                 self.on_ground = False
                 trampoline.activate_bounce()
                 break
+        
+        self.animation_counter += self.animation_speed
+        if self.on_ground:
+            if self.animation_counter >= 1:
+                self.animation_counter = 0
+                self.current_frame = (self.current_frame + 1) % len(self.walking_frames)
+        else:
+            if self.velocity_y < -5: 
+                self.current_frame = 0
+            elif self.velocity_y < 0: 
+                self.current_frame = 1
+            else:  
+                self.current_frame = 2
 
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
 
     def draw(self, screen):
-        pygame.draw.rect(screen, NEON_GREEN, self.get_rect())
+        if self.on_ground:
+            frame = self.walking_frames[self.current_frame]
+        else:
+            frame = self.jumping_frames[self.current_frame]
+        
+        screen.blit(frame, (self.x, self.y))
