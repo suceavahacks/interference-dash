@@ -19,7 +19,8 @@ def reset_game(starting_level=0):
     level.load_level_patterns()
     interference = InterferenceSystem()
     score = 0
-    speed = BASE_SPEED
+    current_level = level.get_current_level()
+    speed = BASE_SPEED * current_level["speed_multiplier"]
     multiplier = SCORE_MULTIPLIER_BASE
     difficulty = 1.0
     return player, level, interference, score, speed, multiplier, difficulty
@@ -85,7 +86,8 @@ while running:
             if level_changed:
                 menu.unlock_next_level()
                 
-                speed = BASE_SPEED
+                current_level = level.get_current_level()
+                speed = BASE_SPEED * current_level["speed_multiplier"]
                 multiplier = 1.0
                 difficulty = 1.0
                 interference.level = 0
@@ -96,7 +98,7 @@ while running:
                 score = 0
                 
                 font_big = pygame.font.Font(None, 72)
-                level_up_text = font_big.render(f"LEVEL UP: {level.get_current_level()['name'].upper()}", True, NEON_GREEN)
+                level_up_text = font_big.render(f"LEVEL UP: {current_level['name'].upper()}", True, NEON_GREEN)
                 screen.blit(level_up_text, (SCREEN_WIDTH // 2 - 300, SCREEN_HEIGHT // 2))
                 pygame.display.flip()
                 pygame.time.wait(1500)

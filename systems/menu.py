@@ -96,25 +96,6 @@ class Menu:
         subtitle_x = SCREEN_WIDTH // 2 - subtitle.get_width() // 2
         screen.blit(subtitle, (subtitle_x, 100))
         
-        if self.character:
-            char_x = SCREEN_WIDTH - 380
-            char_y = SCREEN_HEIGHT // 2 - 100
-            
-            frame_padding = 20
-            frame_rect = pygame.Rect(char_x - frame_padding, char_y - frame_padding, 340, 400)
-            pygame.draw.rect(screen, (0, 0, 0, 180), frame_rect, 0, 10)
-            pygame.draw.rect(screen, (100, 255, 200), frame_rect, 3, 10)
-            
-            char_surface = self.character.convert_alpha()
-            screen.blit(char_surface, (char_x, char_y))
-            
-            name_color = (100, 255, 200)
-            name_text = self.font_large.render("MAX", True, name_color)
-            name_shadow = self.font_large.render("MAX", True, (0, 40, 30))
-            name_x = char_x + 150 - name_text.get_width() // 2
-            screen.blit(name_shadow, (name_x + 2, char_y + 312))
-            screen.blit(name_text, (name_x, char_y + 310))
-        
         start_y = 180
         button_width = 520
         button_height = 70
@@ -194,16 +175,3 @@ class Menu:
                 pygame.draw.circle(screen, (60, 60, 60), (lock_x + 10, lock_y + 18), 3)
                 
                 level_text = self.font_medium.render("LOCKED", True, (80, 80, 80))
-                screen.blit(level_text, (button_x + 70, button_y + 20))
-        
-        key_color = (100, 255, 200)
-        action_color = (255, 200, 120)
-        
-        instructions = self.font_small.render("⬆️ ⬇️  SELECT     ENTER  START", True, WHITE)
-        instructions_shadow = self.font_small.render("⬆️ ⬇️  SELECT     ENTER  START", True, (0, 0, 0))
-
-        inst_x = SCREEN_WIDTH // 2 - instructions.get_width() // 2
-        inst_y = SCREEN_HEIGHT - 40
-        
-        screen.blit(instructions_shadow, (inst_x + 2, inst_y + 2))
-        screen.blit(instructions, (inst_x, inst_y))

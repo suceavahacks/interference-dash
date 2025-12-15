@@ -50,7 +50,7 @@ class Level:
         try:
             with open(self.progress_file, 'w') as f:
                 json.dump({
-                    'highest_level': self.current_level_index,
+                    'unlocked_levels': self.current_level_index + 1,
                     'total_levels': len(LEVELS)
                 }, f)
         except Exception as e:
@@ -61,7 +61,7 @@ class Level:
             if os.path.exists(self.progress_file):
                 with open(self.progress_file, 'r') as f:
                     data = json.load(f)
-                    return data.get('highest_level', 0)
+                    return data.get('unlocked_levels', 1) - 1
         except Exception as e:
             print(f"Error loading progress: {e}")
         return 0

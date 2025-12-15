@@ -1,1 +1,1 @@
-{"unlocked_levels": 5, "total_levels": 5}
+{"unlocked_levels": 2, "total_levels": 5}

@@ -97,7 +97,7 @@ LEVELS = [
             {"x": 16400, "y": 130, "width": 150},
         ],
         "end_score": 4000,
-        "speed_multiplier": 1.1
+        "speed_multiplier": 1.0
     },
     {
         "name": "getting spicy",
@@ -158,7 +158,7 @@ LEVELS = [
             {"x": 18900, "y": 125, "width": 150},
         ],
         "end_score": 6500,
-        "speed_multiplier": 1.2
+        "speed_multiplier": 1.0
     },
     {
         "name": "apocalypse rising",
@@ -207,7 +207,7 @@ LEVELS = [
             {"x": 12500, "y": 120, "width": 150},
         ],
         "end_score": 10000,
-        "speed_multiplier": 1.3
+        "speed_multiplier": 1.0
     },
     {
         "name": "endless chaos",
@@ -217,7 +217,7 @@ LEVELS = [
         "platforms": [],
         "trampolines": [],
         "end_score": -1,
-        "speed_multiplier": 1.4,
+        "speed_multiplier": 1.0,
         "procedural": True,
         "obstacle_frequency": 0.7,
         "collectible_frequency": 0.5,
