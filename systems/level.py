@@ -206,16 +206,14 @@ class Level:
                 self.procedural_next_animated_x = SCREEN_WIDTH + 400
                 
                 self.load_level_patterns()
-                return True
+                return "level_up"
+            else:
+                return "game_won"
         return False
 
     def generate_procedural_obstacle(self, difficulty=1.0):
         current = self.get_current_level()
         if not current.get("procedural", False):
-            return
-        
-        frequency = current["obstacle_frequency"] * difficulty
-        if random.random() > min(frequency, 0.95):
             return
         
         obstacle_type = random.choice(current["obstacle_types"])
@@ -224,7 +222,7 @@ class Level:
             size = 80
             zombie = AnimatedObstacle(self.procedural_next_obstacle_x, self.ground_y - size + 20, size)
             self.animated_obstacles.append(zombie)
-            spacing = random.randint(200, 400) / difficulty
+            spacing = random.randint(250, 500)
             self.procedural_next_obstacle_x += int(spacing)
         elif obstacle_type == "double_spike":
             size = 80
@@ -232,22 +230,19 @@ class Level:
             zombie2 = AnimatedObstacle(self.procedural_next_obstacle_x + size, self.ground_y - size + 20, size)
             self.animated_obstacles.append(zombie1)
             self.animated_obstacles.append(zombie2)
-            spacing = random.randint(200, 400) / difficulty
+            spacing = random.randint(250, 500)
             self.procedural_next_obstacle_x += int(spacing)
         elif obstacle_type == "block":
             height = random.randint(40, 100)
             width = OBSTACLE_WIDTH
             obs = Obstacle(self.procedural_next_obstacle_x, self.ground_y - height, width, height, obstacle_type)
             self.obstacles.append(obs)
-            spacing = random.randint(200, 400) / difficulty
+            spacing = random.randint(250, 500)
             self.procedural_next_obstacle_x += int(spacing)
 
     def generate_procedural_collectible(self):
         current = self.get_current_level()
         if not current.get("procedural", False):
-            return
-        
-        if random.random() > current["collectible_frequency"]:
             return
         
         y_pos = self.ground_y - random.randint(50, 250)
@@ -258,9 +253,6 @@ class Level:
     def generate_procedural_platform(self):
         current = self.get_current_level()
         if not current.get("procedural", False):
-            return
-        
-        if random.random() > current["platform_frequency"]:
             return
         
         width = random.randint(80, 150)
@@ -275,14 +267,11 @@ class Level:
         if not current.get("procedural", False):
             return
         
-        if random.random() > 0.15:
-            return
-        
         width = random.randint(220, 280)
         y_pos = self.ground_y - 70  
         trampoline = Trampoline(self.procedural_next_trampoline_x, y_pos, width, 70)
         self.trampolines.append(trampoline)
-        self.procedural_next_trampoline_x += random.randint(400, 800)
+        self.procedural_next_trampoline_x += random.randint(600, 1000)
 
     def update(self, speed, difficulty=1.0, player_x=None):
         self.bg_scroll_x -= speed * 0.3
@@ -312,17 +301,27 @@ class Level:
 
         current = self.get_current_level()
         if current.get("procedural", False):
-            if self.procedural_next_obstacle_x < SCREEN_WIDTH + 500:
-                self.generate_procedural_obstacle(difficulty)
+            self.procedural_next_trampoline_x -= speed
             
-            if self.procedural_next_collectible_x < SCREEN_WIDTH + 600:
-                self.generate_procedural_collectible()
+            if current.get("trampoline_only", False):
+                while self.procedural_next_trampoline_x < SCREEN_WIDTH + 750:
+                    self.generate_procedural_trampoline()
+            else:
+                self.procedural_next_obstacle_x -= speed
+                self.procedural_next_collectible_x -= speed
+                self.procedural_next_platform_x -= speed
+                
+                while self.procedural_next_obstacle_x < SCREEN_WIDTH + 500:
+                    self.generate_procedural_obstacle(difficulty)
+                
+                while self.procedural_next_collectible_x < SCREEN_WIDTH + 600:
+                    self.generate_procedural_collectible()
 
-            if self.procedural_next_platform_x < SCREEN_WIDTH + 700:
-                self.generate_procedural_platform()
-            
-            if self.procedural_next_trampoline_x < SCREEN_WIDTH + 750:
-                self.generate_procedural_trampoline()
+                while self.procedural_next_platform_x < SCREEN_WIDTH + 700:
+                    self.generate_procedural_platform()
+                
+                while self.procedural_next_trampoline_x < SCREEN_WIDTH + 750:
+                    self.generate_procedural_trampoline()
         else:
             rightmost_x = 0
             for obs in self.obstacles:

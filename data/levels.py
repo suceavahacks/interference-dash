@@ -234,20 +234,16 @@ LEVELS = [
         "speed_multiplier": 1.0
     },
     {
-        "name": "endless chaos",
+        "name": "trampoline heaven",
         "bg_color": (20, 0, 60),
         "obstacles": [],
         "collectibles": [],
         "platforms": [],
         "trampolines": [],
-        "end_score": -1,
+        "end_score": 5000,
         "speed_multiplier": 1.0,
         "procedural": True,
-        "obstacle_frequency": 0.7,
-        "collectible_frequency": 0.5,
-        "platform_frequency": 0.6,
-        "trampoline_frequency": 0.15,
-        "obstacle_types": ["spike", "block", "double_spike"]
+        "trampoline_only": True
     }
 ]
 
