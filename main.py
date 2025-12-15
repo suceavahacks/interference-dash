@@ -107,9 +107,46 @@ while running:
                 player.on_ground = False
                 score = 0
                 
-                font_big = pygame.font.Font(None, 72)
-                level_up_text = font_big.render(f"LEVEL UP: {current_level['name'].upper()}", True, NEON_GREEN)
-                screen.blit(level_up_text, (SCREEN_WIDTH // 2 - 300, SCREEN_HEIGHT // 2))
+                overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+                overlay.set_alpha(220)
+                overlay.fill((0, 0, 0))
+                screen.blit(overlay, (0, 0))
+                
+                panel_width = 600
+                panel_height = 250
+                panel_x = SCREEN_WIDTH // 2 - panel_width // 2
+                panel_y = SCREEN_HEIGHT // 2 - panel_height // 2
+                
+                panel_bg = pygame.Surface((panel_width, panel_height))
+                panel_bg.set_alpha(240)
+                panel_bg.fill((20, 10, 30))
+                screen.blit(panel_bg, (panel_x, panel_y))
+                
+                pygame.draw.rect(screen, (100, 255, 200), (panel_x, panel_y, panel_width, panel_height), 5, 15)
+                
+                corner_size = 15
+                corners = [
+                    (panel_x, panel_y),
+                    (panel_x + panel_width - corner_size, panel_y),
+                    (panel_x, panel_y + panel_height - corner_size),
+                    (panel_x + panel_width - corner_size, panel_y + panel_height - corner_size)
+                ]
+                for cx, cy in corners:
+                    pygame.draw.rect(screen, (100, 255, 200), (cx, cy, corner_size, corner_size))
+                
+                font_title = pygame.font.Font(None, 84)
+                font_subtitle = pygame.font.Font(None, 56)
+                
+                title_text = font_title.render("LEVEL UP!", True, (100, 255, 200))
+                title_shadow = font_title.render("LEVEL UP!", True, (50, 127, 100))
+                title_x = panel_x + panel_width // 2 - title_text.get_width() // 2
+                screen.blit(title_shadow, (title_x + 4, panel_y + 44))
+                screen.blit(title_text, (title_x, panel_y + 40))
+                
+                level_name = font_subtitle.render(current_level['name'].upper(), True, (255, 200, 120))
+                level_x = panel_x + panel_width // 2 - level_name.get_width() // 2
+                screen.blit(level_name, (level_x, panel_y + 140))
+                
                 pygame.display.flip()
                 pygame.time.wait(1500)
 

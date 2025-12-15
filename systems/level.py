@@ -321,8 +321,14 @@ class Level:
             for plat in self.platforms:
                 if plat.x > rightmost_x:
                     rightmost_x = plat.x
+            for anim in self.animated_obstacles:
+                if anim.x > rightmost_x:
+                    rightmost_x = anim.x
+            for tramp in self.trampolines:
+                if tramp.x > rightmost_x:
+                    rightmost_x = tramp.x
             
-            if rightmost_x < SCREEN_WIDTH + 1000:
+            if rightmost_x < SCREEN_WIDTH + 2000:
                 self.repeat_level_pattern()
 
     def draw(self, screen, shake_offset):
