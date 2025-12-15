@@ -28,21 +28,8 @@ class Platform:
 
     def draw(self, screen):
         if Platform.platform_image and Platform.platform_image is not False:
-            img_width = Platform.platform_image.get_width()
-            img_height = Platform.platform_image.get_height()
-            
-            scale_factor = self.height / img_height
-            scaled_width = int(img_width * scale_factor)
-            scaled_height = self.height
-            scaled_img = pygame.transform.scale(Platform.platform_image, (scaled_width, scaled_height))
-            
-            num_tiles = int(self.width / scaled_width) + 1
-            for i in range(num_tiles):
-                tile_x = self.x + i * scaled_width
-                if tile_x < self.x + self.width:
-                    clip_width = min(scaled_width, self.x + self.width - tile_x)
-                    clipped_img = scaled_img.subsurface((0, 0, clip_width, scaled_height))
-                    screen.blit(clipped_img, (tile_x, self.y))
+            scaled_img = pygame.transform.scale(Platform.platform_image, (self.width, self.height))
+            screen.blit(scaled_img, (self.x, self.y))
         else:
             pygame.draw.rect(screen, (60, 60, 60), self.get_rect())
             for i in range(0, int(self.width), 20):
