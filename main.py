@@ -44,7 +44,8 @@ while running:
                 if event.key == pygame.K_SPACE and not game_over:
                     player.jump()
                 if event.key == pygame.K_r and game_over:
-                    player, level, interference, score, speed, multiplier, difficulty = reset_game(menu.selected_level)
+                    current_level = level.current_level_index
+                    player, level, interference, score, speed, multiplier, difficulty = reset_game(current_level)
                     game_over = False
                 if event.key == pygame.K_ESCAPE:
                     if game_over:
@@ -205,8 +206,60 @@ while running:
         screen.blit(speed_label, (speed_bar_x + 5, bar_panel_y + 8))
 
         if game_over:
-            game_over_text = font.render("GAME OVER - R: restart | ESC: menu", True, RED)
-            screen.blit(game_over_text, (SCREEN_WIDTH // 2 - 280, SCREEN_HEIGHT // 2))
+            overlay = pygame.Surface((SCREEN_WIDTH, SCREEN_HEIGHT))
+            overlay.set_alpha(200)
+            overlay.fill((0, 0, 0))
+            screen.blit(overlay, (0, 0))
+            
+            game_over_panel_width = 500
+            game_over_panel_height = 300
+            panel_x = SCREEN_WIDTH // 2 - game_over_panel_width // 2
+            panel_y = SCREEN_HEIGHT // 2 - game_over_panel_height // 2
+            
+            panel_bg = pygame.Surface((game_over_panel_width, game_over_panel_height))
+            panel_bg.set_alpha(220)
+            panel_bg.fill((20, 10, 30))
+            screen.blit(panel_bg, (panel_x, panel_y))
+            
+            pygame.draw.rect(screen, (255, 100, 150), (panel_x, panel_y, game_over_panel_width, game_over_panel_height), 4, 12)
+            
+            corner_size = 12
+            corners = [
+                (panel_x, panel_y),
+                (panel_x + game_over_panel_width - corner_size, panel_y),
+                (panel_x, panel_y + game_over_panel_height - corner_size),
+                (panel_x + game_over_panel_width - corner_size, panel_y + game_over_panel_height - corner_size)
+            ]
+            for cx, cy in corners:
+                pygame.draw.rect(screen, (255, 100, 150), (cx, cy, corner_size, corner_size))
+            
+            font_title = pygame.font.Font(None, 72)
+            font_info = pygame.font.Font(None, 42)
+            font_button = pygame.font.Font(None, 36)
+            
+            title_text = font_title.render("GAME OVER", True, (255, 100, 150))
+            title_shadow = font_title.render("GAME OVER", True, (100, 0, 50))
+            title_x = panel_x + game_over_panel_width // 2 - title_text.get_width() // 2
+            screen.blit(title_shadow, (title_x + 3, panel_y + 33))
+            screen.blit(title_text, (title_x, panel_y + 30))
+            
+            final_score_label = font_info.render("FINAL SCORE", True, (150, 150, 150))
+            final_score_value = font_title.render(str(score), True, (255, 200, 120))
+            score_label_x = panel_x + game_over_panel_width // 2 - final_score_label.get_width() // 2
+            score_value_x = panel_x + game_over_panel_width // 2 - final_score_value.get_width() // 2
+            screen.blit(final_score_label, (score_label_x, panel_y + 110))
+            screen.blit(final_score_value, (score_value_x, panel_y + 145))
+            
+            button_y = panel_y + 220
+            
+            restart_text = font_button.render("R  RESTART", True, (100, 255, 200))
+            menu_text = font_button.render("ESC  MENU", True, (100, 255, 200))
+            
+            restart_x = panel_x + game_over_panel_width // 2 - restart_text.get_width() - 30
+            menu_x = panel_x + game_over_panel_width // 2 + 30
+            
+            screen.blit(restart_text, (restart_x, button_y))
+            screen.blit(menu_text, (menu_x, button_y))
 
     pygame.display.flip()
     clock.tick(FPS)

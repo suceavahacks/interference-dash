@@ -40,23 +40,13 @@ class Player:
         self.y += self.velocity_y
 
         self.on_ground = False
+        
+        on_trampoline = False
 
         if self.y >= ground_y - self.height:
             self.y = ground_y - self.height
             self.velocity_y = 0
             self.on_ground = True
-
-        for platform in platforms:
-            player_rect = self.get_rect()
-            platform_rect = platform.get_rect()
-            
-            if (player_rect.colliderect(platform_rect) and 
-                self.velocity_y >= 0 and
-                player_rect.bottom - self.velocity_y <= platform_rect.top + 5):
-                self.y = platform_rect.top - self.height
-                self.velocity_y = 0
-                self.on_ground = True
-                break
         
         for trampoline in trampolines:
             player_rect = self.get_rect()
@@ -64,12 +54,26 @@ class Player:
             
             if (player_rect.colliderect(trampoline_rect) and 
                 self.velocity_y >= 0 and
-                player_rect.bottom - self.velocity_y <= trampoline_rect.top + 5):
+                player_rect.bottom - self.velocity_y <= trampoline_rect.top + 10):
                 self.y = trampoline_rect.top - self.height
-                self.velocity_y = JUMP_STRENGTH * 1.8
+                self.velocity_y = JUMP_STRENGTH * 1.5
                 self.on_ground = False
+                on_trampoline = True
                 trampoline.activate_bounce()
                 break
+
+        if not on_trampoline:
+            for platform in platforms:
+                player_rect = self.get_rect()
+                platform_rect = platform.get_rect()
+                
+                if (player_rect.colliderect(platform_rect) and 
+                    self.velocity_y >= 0 and
+                    player_rect.bottom - self.velocity_y <= platform_rect.top + 10):
+                    self.y = platform_rect.top - self.height
+                    self.velocity_y = 0
+                    self.on_ground = True
+                    break
         
         self.animation_counter += self.animation_speed
         if self.on_ground:
@@ -89,8 +93,8 @@ class Player:
 
     def draw(self, screen):
         if self.on_ground:
-            frame = self.walking_frames[self.current_frame]
+            frame = self.walking_frames[self.current_frame % len(self.walking_frames)]
         else:
-            frame = self.jumping_frames[self.current_frame]
+            frame = self.jumping_frames[min(self.current_frame, len(self.jumping_frames) - 1)]
         
         screen.blit(frame, (self.x, self.y))
