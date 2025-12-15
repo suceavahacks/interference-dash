@@ -6,10 +6,20 @@ from systems.interference import InterferenceSystem
 from systems.menu import Menu
 
 pygame.init()
+pygame.mixer.init(frequency=44100, size=-16, channels=2, buffer=512)
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("interference-dash")
 clock = pygame.time.Clock()
 font = pygame.font.Font(None, 36)
+
+try:
+    pygame.mixer.music.load("assets/background_music.ogg")
+    pygame.mixer.music.set_volume(0.7)
+    pygame.mixer.music.play(-1)
+except Exception as e:
+    print(f"Error loading background music: {e}")
+    import traceback
+    traceback.print_exc()
 
 def reset_game(starting_level=0):
     player = Player(200, SCREEN_HEIGHT - 100 - PLAYER_SIZE)
